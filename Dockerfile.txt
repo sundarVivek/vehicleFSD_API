@@ -1,0 +1,25 @@
+# Use the official .NET SDK image as a build environment
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the project files
+COPY *.csproj ./
+RUN dotnet restore
+
+# Copy the rest of the application and publish it
+COPY . ./
+RUN dotnet publish -c Release -o /app/publish
+
+# Use the official .NET runtime image as the runtime environment
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the published application from the build stage
+COPY --from=build /app/publish .
+
+# Specify the entry point for the application
+ENTRYPOINT ["dotnet", "vehicleFSD_API-master.dll"]
